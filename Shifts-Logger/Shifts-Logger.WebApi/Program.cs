@@ -1,8 +1,13 @@
+using Microsoft.EntityFrameworkCore;
+using ShiftsLogger.WebApi.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddDbContext<WorkerShiftContext>();
 
 var app = builder.Build();
 
