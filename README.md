@@ -20,7 +20,7 @@
 
 ## 🔥 Challenges / Lessons Learned
 
-  - First time making an API -> had only vaugely even heard of HTTP PUT and DELETE methods
+  - First time making an API -> had only vaguely even heard of HTTP PUT and DELETE methods
 
 
 ## 🌟 Things I Did Well
