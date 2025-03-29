@@ -1,27 +1,44 @@
-using Microsoft.EntityFrameworkCore;
 using ShiftsLogger.WebApi.Data;
+using ShiftsLogger.WebApi.Repository;
 
-var builder = WebApplication.CreateBuilder(args);
+namespace ShiftsLogger.WebApi;
 
-builder.Services.AddControllers();
-builder.Services.AddOpenApi();
-builder.Services.AddSwaggerGen();
-
-builder.Services.AddDbContext<WorkerShiftContext>();
-
-var app = builder.Build();
-
-app.MapOpenApi();
-app.UseSwagger();
-app.UseSwaggerUI(options =>
+class Program
 {
-    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Shifts Logger v1 API");
-});
+    public static async Task Main(string[] args)
+    {
+        var builder = WebApplication.CreateBuilder(args);
 
-app.UseHttpsRedirection();
+        builder.Services.AddControllers();
+        builder.Services.AddOpenApi();
+        builder.Services.AddSwaggerGen();
 
-app.UseAuthorization();
+        builder.Services.AddDbContext<WorkerShiftContext>();
+        builder.Services.AddScoped<WorkerShiftRepository>();
 
-app.MapControllers();
+        var app = builder.Build();
 
-app.Run();
+        using (var scope = app.Services.CreateScope())
+        {
+            var services = scope.ServiceProvider;
+            var context = services.GetRequiredService<WorkerShiftContext>();
+
+            await DbInitializer.Seed(context);
+        }
+
+        app.MapOpenApi();
+        app.UseSwagger();
+        app.UseSwaggerUI(options =>
+        {
+            options.SwaggerEndpoint("/swagger/v1/swagger.json", "Shifts Logger v1 API");
+        });
+
+        app.UseHttpsRedirection();
+
+        app.UseAuthorization();
+
+        app.MapControllers();
+
+        app.Run();
+    }
+}

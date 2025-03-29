@@ -5,8 +5,8 @@ namespace ShiftsLogger.WebApi.Data;
 
 public class WorkerShiftContext : DbContext
 {
-    DbSet<Worker> Workers { get; set; } = null!;
-    DbSet<Shift> Shifts { get; set; } = null!;
+    internal DbSet<Worker> Workers { get; set; } = null!;
+    internal DbSet<Shift> Shifts { get; set; } = null!;
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
