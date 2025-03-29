@@ -9,79 +9,78 @@ using ShiftsLogger.WebApi.Data;
 
 #nullable disable
 
-namespace ShiftsLogger.WebApi.Migrations
+namespace ShiftsLogger.WebApi.Migrations;
+
+[DbContext(typeof(WorkerShiftContext))]
+[Migration("20250328191900_InitialCreate")]
+partial class InitialCreate
 {
-    [DbContext(typeof(WorkerShiftContext))]
-    [Migration("20250328191900_InitialCreate")]
-    partial class InitialCreate
+    /// <inheritdoc />
+    protected override void BuildTargetModel(ModelBuilder modelBuilder)
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
-        {
 #pragma warning disable 612, 618
-            modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.3")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+        modelBuilder
+            .HasAnnotation("ProductVersion", "9.0.3")
+            .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+        SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("ShiftsLogger.WebApi.Models.Shift", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+        modelBuilder.Entity("ShiftsLogger.WebApi.Models.Shift", b =>
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("EndTime")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("EndTime")
+                    .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("StartTime")
+                    .HasColumnType("datetime2");
 
-                    b.Property<int>("WorkerId")
-                        .HasColumnType("int");
+                b.Property<int>("WorkerId")
+                    .HasColumnType("int");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("WorkerId");
+                b.HasIndex("WorkerId");
 
-                    b.ToTable("Shifts");
-                });
+                b.ToTable("Shifts");
+            });
 
-            modelBuilder.Entity("ShiftsLogger.WebApi.Models.Worker", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+        modelBuilder.Entity("ShiftsLogger.WebApi.Models.Worker", b =>
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.ToTable("Workers");
-                });
+                b.ToTable("Workers");
+            });
 
-            modelBuilder.Entity("ShiftsLogger.WebApi.Models.Shift", b =>
-                {
-                    b.HasOne("ShiftsLogger.WebApi.Models.Worker", "Worker")
-                        .WithMany("Shifts")
-                        .HasForeignKey("WorkerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+        modelBuilder.Entity("ShiftsLogger.WebApi.Models.Shift", b =>
+            {
+                b.HasOne("ShiftsLogger.WebApi.Models.Worker", "Worker")
+                    .WithMany("Shifts")
+                    .HasForeignKey("WorkerId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Worker");
-                });
+                b.Navigation("Worker");
+            });
 
-            modelBuilder.Entity("ShiftsLogger.WebApi.Models.Worker", b =>
-                {
-                    b.Navigation("Shifts");
-                });
+        modelBuilder.Entity("ShiftsLogger.WebApi.Models.Worker", b =>
+            {
+                b.Navigation("Shifts");
+            });
 #pragma warning restore 612, 618
-        }
     }
 }
