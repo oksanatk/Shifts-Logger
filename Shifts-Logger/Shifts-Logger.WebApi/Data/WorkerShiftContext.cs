@@ -23,6 +23,7 @@ public class WorkerShiftContext : DbContext
             .HasOne(s => s.Worker)
             .WithMany(s => s.Shifts)
             .HasForeignKey(s => s.WorkerId)
+            .OnDelete(DeleteBehavior.Cascade)
             .IsRequired();
     }
 }
