@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ShiftsLogger.WebApi.Models;
-using System;
+﻿using ShiftsLogger.WebApi.Models;
 
 namespace ShiftsLogger.WebApi.Data;
 
@@ -11,11 +9,11 @@ public static class DbInitializer
         if (!context.Workers.Any() && !context.Shifts.Any())
         {
             List<Worker> sampleWorkers = GenerateWorkers();
-            List<Shift> sampleShifts = GenerateShifts(sampleWorkers);
-
             await context.Workers.AddRangeAsync(sampleWorkers);
-            await context.Shifts.AddRangeAsync(sampleShifts);
+            await context.SaveChangesAsync();
 
+            List<Shift> sampleShifts = GenerateShifts(sampleWorkers);
+            await context.Shifts.AddRangeAsync(sampleShifts);
             await context.SaveChangesAsync();
         }
     }
@@ -30,7 +28,6 @@ public static class DbInitializer
         {
             Worker worker = new Worker()
             {
-                Id = i,
                 Name = sampleName[i-1],
             };
             sampleWorkers.Add(worker);
@@ -59,7 +56,6 @@ public static class DbInitializer
             {
                 Shift shift = new Shift()
                 {
-                    Id = i,
                     WorkerId = randomWorkerId,
                     StartTime = shiftStartTime,
                     EndTime = shiftEndTime,
