@@ -2,7 +2,7 @@
 using ShiftsLogger.WebApi.Models;
 
 namespace ShiftsLogger.WebApi.Data;
-internal class WorkerShiftContext : DbContext
+public class WorkerShiftContext : DbContext
 {
     internal DbSet<Worker> Workers { get; set; } = null!;
     internal DbSet<Shift> Shifts { get; set; } = null!;

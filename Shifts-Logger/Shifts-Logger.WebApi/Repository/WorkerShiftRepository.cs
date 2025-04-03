@@ -4,7 +4,7 @@ using ShiftsLogger.WebApi.Models;
 
 namespace ShiftsLogger.WebApi.Repository;
 
-internal class WorkerShiftRepository
+public class WorkerShiftRepository
 {
     private readonly WorkerShiftContext _context;
 
@@ -13,27 +13,27 @@ internal class WorkerShiftRepository
         _context = context;
     }
 
-    public async Task<List<Shift>> ReadAllWorkersAllShifts()
+    internal async Task<List<Shift>> ReadAllWorkersAllShifts()
     {
         List<Shift> allShifts = await _context.Shifts.ToListAsync();
 
         return allShifts;
     }
 
-    public async Task<List<Shift>> ReadAllShiftsForWorker(Worker worker)
+    internal async Task<List<Shift>> ReadAllShiftsForWorker(int id)
     {
-        List<Shift> workerShifts =  await _context.Shifts.Where(s => s.WorkerId == worker.Id).ToListAsync();
+        List<Shift> workerShifts =  await _context.Shifts.Where(s => s.WorkerId == id).ToListAsync();
 
         return workerShifts;
     }
 
-    public async Task AddWorker(string name)
+    internal async Task AddWorker(string name)
     {
         await _context.Workers.AddAsync(new Worker { Name = name });
         await _context.SaveChangesAsync();
     }
 
-    public async Task AddShiftToWorker(int workerId, DateTime startTime, DateTime endTime)
+    internal async Task AddShiftToWorker(int workerId, DateTime startTime, DateTime endTime)
     {
         await _context.Shifts.AddAsync(new Shift
         {
@@ -44,28 +44,33 @@ internal class WorkerShiftRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task UpdateWorker(int id, string newName)
+    internal async Task<bool> UpdateWorker(int id, string newName)
     {
         Worker? worker = await _context.Workers.SingleOrDefaultAsync(w => w.Id == id);
         if (worker != null)
         {
             worker.Name = newName;
             await _context.SaveChangesAsync();
+            return true;
         }
+        return false;
     }
 
-    public async Task UpdateShift(int id, DateTime newStartTime, DateTime newEndTime)
+    internal async Task<bool> UpdateShift(int id, DateTime newStartTime, DateTime newEndTime)
     {
         Shift? shift = await _context.Shifts.SingleOrDefaultAsync(s => s.Id == id);
         if (shift != null)
         {
             shift.StartTime = newStartTime;
             shift.EndTime = newEndTime;
-            await _context.SaveChangesAsync();                                           
+
+            await _context.SaveChangesAsync();
+            return true;
         }
+        return false;
     }
 
-    public async Task DeleteWorker(int id)
+    internal async Task<bool> DeleteWorker(int id)
     {
         Worker? worker = await _context.Workers.SingleOrDefaultAsync(w => w.Id == id);
 
@@ -73,17 +78,22 @@ internal class WorkerShiftRepository
         {
             _context.Workers.Remove(worker);
             await _context.SaveChangesAsync();
+            return true;
         }
+        return false;
     }
 
-    public async Task DeleteShift(int id)
+    internal async Task<bool> DeleteShift(int id)
     {
         Shift? shift = await _context.Shifts.SingleOrDefaultAsync(s => s.Id == id);
         if (shift != null)
         {
             _context.Shifts.Remove(shift);
             await _context.SaveChangesAsync();
+
+            return true;
         }
+        return false;
     }
 
 }
