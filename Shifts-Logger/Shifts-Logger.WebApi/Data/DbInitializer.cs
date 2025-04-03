@@ -2,9 +2,9 @@
 
 namespace ShiftsLogger.WebApi.Data;
 
-public static class DbInitializer
+internal static class DbInitializer
 {
-    public static async Task Seed(WorkerShiftContext context)
+    internal static async Task Seed(WorkerShiftContext context)
     {
         if (!context.Workers.Any() && !context.Shifts.Any())
         {
@@ -18,7 +18,7 @@ public static class DbInitializer
         }
     }
 
-    public static List<Worker> GenerateWorkers()
+    private static List<Worker> GenerateWorkers()
     {
         List<Worker> sampleWorkers = new();
         Random random = new Random();
@@ -35,7 +35,7 @@ public static class DbInitializer
         return sampleWorkers;
     }
 
-    public static List<Shift> GenerateShifts(List<Worker> workers)
+    private static List<Shift> GenerateShifts(List<Worker> workers)
     {
         List<Shift> sampleShifts = new();
         Random random = new();

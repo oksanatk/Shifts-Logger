@@ -1,13 +1,13 @@
 ﻿namespace ShiftsLogger.WebApi.Models;
 
-public class Shift
+internal class Shift
 {
-    public int Id { get; set; }
-    public Worker Worker { get; set; } = null!;
-    public int WorkerId { get; set; }
-    public DateTime StartTime { get; set; } = new();
-    public DateTime EndTime { get; set; } = new();
-    public TimeSpan Duration
+    internal int Id { get; set; }
+    internal Worker Worker { get; set; } = null!;
+    internal int WorkerId { get; set; }
+    internal DateTime StartTime { get; set; } = new();
+    internal DateTime EndTime { get; set; } = new();
+    internal TimeSpan Duration
     {
         get
         {
