@@ -1,8 +1,8 @@
 ﻿namespace ShiftsLogger.WebApi.Models;
 
-internal class Worker
+public class Worker
 {
-    internal int Id { get; set; }
-    internal string Name { get; set; } = null!;
-    internal List<Shift> Shifts { get; set; } = null!;
+    public int Id { get; set; }
+    public string Name { get; set; } = null!;
+    public List<Shift> Shifts { get; set; } = null!;
 }

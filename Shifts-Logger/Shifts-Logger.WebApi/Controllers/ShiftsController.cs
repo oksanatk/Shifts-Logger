@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using ShiftsLogger.WebApi.Models;
+using ShiftsLogger.WebApi.Repository;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -8,11 +10,17 @@ namespace Shifts_Logger.WebApi.Controllers;
 [ApiController]
 public class ShiftsController : ControllerBase
 {
+    private readonly WorkerShiftRepository _repository;
+    public ShiftsController(WorkerShiftRepository repository)
+    {
+        _repository = repository;
+    }
     // GET: api/Shifts
     [HttpGet]
-    public IEnumerable<string> Get()
+    public async Task<IActionResult> Get()
     {
-        return new string[] { "value1", "value2" };
+        List<Shift> workersShifts = await _repository.ReadAllWorkersAllShifts();
+        return Ok(workersShifts);
     }
 
     // GET api/Shifts/5
