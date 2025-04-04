@@ -26,6 +26,11 @@ public class WorkerShiftRepository
 
         return workerShifts;
     }
+    internal async Task<List<Worker>> ReadAllWorkers()
+    {
+        List<Worker> workers = await _context.Workers.ToListAsync();
+        return workers;
+    }
 
     internal async Task AddWorker(string name)
     {
