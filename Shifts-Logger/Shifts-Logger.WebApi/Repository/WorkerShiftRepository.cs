@@ -32,21 +32,30 @@ public class WorkerShiftRepository
         return workers;
     }
 
-    internal async Task AddWorker(string name)
+    internal Worker? ReadWorker(int id)
     {
-        await _context.Workers.AddAsync(new Worker { Name = name });
-        await _context.SaveChangesAsync();
+        return _context.Workers.SingleOrDefault(w => w.Id == id);
     }
 
-    internal async Task AddShiftToWorker(int workerId, DateTime startTime, DateTime endTime)
+    internal async Task<Worker> AddWorker(string name)
     {
-        await _context.Shifts.AddAsync(new Shift
-        {
+        Worker newWorker = new Worker { Name = name };
+        await _context.Workers.AddAsync(newWorker);
+        await _context.SaveChangesAsync();
+        return newWorker;
+    }
+
+    internal async Task<Shift> AddShiftToWorker(int workerId, DateTime startTime, DateTime endTime)
+    {
+        Shift newShift = new Shift() {
             WorkerId = workerId,
             StartTime = startTime,
-            EndTime = endTime
-        });
+            EndTime = endTime };
+
+        await _context.Shifts.AddAsync(newShift);
         await _context.SaveChangesAsync();
+
+        return newShift;
     }
 
     internal async Task<bool> UpdateWorker(int id, string newName)

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using ShiftsLogger.WebApi.Filters;
 using ShiftsLogger.WebApi.Models;
 using ShiftsLogger.WebApi.Repository;
 
@@ -31,7 +32,7 @@ public class ShiftsController(WorkerShiftRepository repository) : ControllerBase
     public async Task<IActionResult> GetWorkerShifts(int workerId)
     {
         List<Shift> workerShifts = await _repository.ReadAllShiftsForWorker(workerId);
-        if (workerShifts == null) return NotFound(); //404 Not Found
+        if (workerShifts == null) return NotFound(); //  404 Not Found
 
         return Ok(workerShifts);
     }
@@ -41,26 +42,32 @@ public class ShiftsController(WorkerShiftRepository repository) : ControllerBase
     public async Task<IActionResult> CreateWorker([FromBody] Worker worker)
     {
         if (worker == null) return BadRequest();  // code 400 Bad Request
-        await _repository.AddWorker(worker.Name);
+        Worker newWorker = await _repository.AddWorker(worker.Name);
 
-        return CreatedAtAction(nameof(GetWorkerShifts), new { id = worker.Id }, worker);
+        return CreatedAtAction(nameof(GetWorkerShifts), new { workerId = newWorker.Id }, worker);
     }
 
     // POST api/Shifts/{shiftId}
     [HttpPost("{workerId}")]
-    public async Task<IActionResult> CreateShift([FromBody] Shift shift)
+    public async Task<IActionResult> CreateShift([FromRoute] int workerId, [FromBody] CreateShiftDto shiftDto)
     {
-        if (shift.WorkerId < 1 || shift.StartTime == DateTime.MinValue || shift.EndTime == DateTime.MinValue)
+        if (shiftDto.WorkerId < 1 || shiftDto.StartTime <= DateTime.Now.AddYears(-10) || shiftDto.EndTime == DateTime.Now.AddYears(-10) || shiftDto.WorkerId != workerId) 
         {
             return BadRequest(); // Code  400 Bad Request
         }
+        Worker? relevantWorker = _repository.ReadWorker(workerId);
+        if (relevantWorker == null)
+        {
+            return NotFound();
+        }
 
-        await _repository.AddShiftToWorker(shift.WorkerId, shift.StartTime, shift.EndTime);
-        return CreatedAtAction(nameof(GetWorkerShifts), new { id = shift.Id }, shift);
+        Shift newShift = await _repository.AddShiftToWorker(shiftDto.WorkerId, shiftDto.StartTime, shiftDto.EndTime);
+        return CreatedAtAction(nameof(GetWorkerShifts), new { workerId = newShift.WorkerId}, relevantWorker);
     }
 
     // PUT api/Shifts/5
     [HttpPut("{workerId}")]
+    [ServiceFilter(typeof(ManagerAuthorizationFilter))]
     public async Task<IActionResult> UpdateWorker(int workerId, [FromBody] Worker worker)
     {
         if (worker == null || worker.Id != workerId) return BadRequest();
@@ -75,6 +82,7 @@ public class ShiftsController(WorkerShiftRepository repository) : ControllerBase
     // TODO
     //Put api/Shifts/5/{shiftId}
     [HttpPut("{workerId}/{shiftId}")]
+    [ServiceFilter(typeof(ManagerAuthorizationFilter))]
     public async Task<IActionResult> UpdateShift(int shiftId, [FromBody] Shift shift)
     {
         if (shift == null || shift.WorkerId != shiftId) return BadRequest();
@@ -88,6 +96,7 @@ public class ShiftsController(WorkerShiftRepository repository) : ControllerBase
     // TODO
     // DELETE api/Shifts/5
     [HttpDelete("{workerId}")]
+    [ServiceFilter(typeof(ManagerAuthorizationFilter))]
     public async Task<IActionResult> DeleteWorker(int workerId)
     {
         bool deleted = await _repository.DeleteWorker(workerId);
@@ -99,6 +108,7 @@ public class ShiftsController(WorkerShiftRepository repository) : ControllerBase
     // TODO
     // DELETE api/Shifts/5/{shiftId}
     [HttpDelete("{workerId}/{shiftId}")]
+    [ServiceFilter(typeof(ManagerAuthorizationFilter))]
     public async Task<IActionResult> DeleteShift(int shiftId)
     {
         bool deleted = await _repository.DeleteShift(shiftId);
