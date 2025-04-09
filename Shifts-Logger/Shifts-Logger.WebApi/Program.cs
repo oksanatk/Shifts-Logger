@@ -1,4 +1,5 @@
 using ShiftsLogger.WebApi.Data;
+using ShiftsLogger.WebApi.Filters;
 using ShiftsLogger.WebApi.Repository;
 
 namespace ShiftsLogger.WebApi;
@@ -15,6 +16,7 @@ class Program
 
         builder.Services.AddDbContext<WorkerShiftContext>();
         builder.Services.AddScoped<WorkerShiftRepository>();
+        builder.Services.AddScoped<ManagerAuthorizationFilter>();
 
         var app = builder.Build();
 

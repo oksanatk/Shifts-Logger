@@ -31,7 +31,7 @@ public class ShiftsController(WorkerShiftRepository repository) : ControllerBase
     [HttpGet("{workerId}")]
     public async Task<IActionResult> GetWorkerShifts(int workerId)
     {
-        List<Shift> workerShifts = await _repository.ReadAllShiftsForWorker(workerId);
+        List<Shift>? workerShifts = await _repository.ReadAllShiftsForWorker(workerId);
         if (workerShifts == null) return NotFound(); //  404 Not Found
 
         return Ok(workerShifts);
@@ -41,17 +41,17 @@ public class ShiftsController(WorkerShiftRepository repository) : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateWorker([FromBody] Worker worker)
     {
-        if (worker == null) return BadRequest();  // code 400 Bad Request
+        if (worker == null || String.IsNullOrEmpty(worker.Name)) return BadRequest();  // code 400 Bad Request
         Worker newWorker = await _repository.AddWorker(worker.Name);
 
-        return CreatedAtAction(nameof(GetWorkerShifts), new { workerId = newWorker.Id }, worker);
+        return CreatedAtAction(nameof(GetWorkerShifts), new { WorkerId = newWorker.Id } , newWorker);
     }
 
-    // POST api/Shifts/{shiftId}
+    // POST api/Shifts/{workerId}
     [HttpPost("{workerId}")]
     public async Task<IActionResult> CreateShift([FromRoute] int workerId, [FromBody] CreateShiftDto shiftDto)
     {
-        if (shiftDto.WorkerId < 1 || shiftDto.StartTime <= DateTime.Now.AddYears(-10) || shiftDto.EndTime == DateTime.Now.AddYears(-10) || shiftDto.WorkerId != workerId) 
+        if (shiftDto.WorkerId < 1 || shiftDto.StartTime <= DateTime.Now.AddYears(-10) || shiftDto.EndTime >= DateTime.Now || shiftDto.WorkerId != workerId) 
         {
             return BadRequest(); // Code  400 Bad Request
         }
@@ -70,7 +70,7 @@ public class ShiftsController(WorkerShiftRepository repository) : ControllerBase
     [ServiceFilter(typeof(ManagerAuthorizationFilter))]
     public async Task<IActionResult> UpdateWorker(int workerId, [FromBody] Worker worker)
     {
-        if (worker == null || worker.Id != workerId) return BadRequest();
+        if (worker == null || worker.Id != workerId || String.IsNullOrEmpty(worker.Name)) return BadRequest();
 
         bool wasUpdated = await _repository.UpdateWorker(workerId, worker.Name);
 
@@ -79,25 +79,23 @@ public class ShiftsController(WorkerShiftRepository repository) : ControllerBase
         return NoContent(); // code 204 No Content -> successful update
     }
 
-    // TODO
-    //Put api/Shifts/5/{shiftId}
+    // PUT api/Shifts/5/{shiftId}
     [HttpPut("{workerId}/{shiftId}")]
     [ServiceFilter(typeof(ManagerAuthorizationFilter))]
-    public async Task<IActionResult> UpdateShift(int shiftId, [FromBody] Shift shift)
+    public async Task<IActionResult> UpdateShift([FromRoute] int workerId, [FromBody] UpdateShiftDto shiftDto)
     {
-        if (shift == null || shift.WorkerId != shiftId) return BadRequest();
+        if (shiftDto == null || shiftDto.WorkerId != workerId || shiftDto.StartTime <= DateTime.Now.AddYears(-10) || shiftDto.EndTime >= DateTime.Now ) return BadRequest();
 
-        bool updated = await _repository.UpdateShift(shiftId, shift.StartTime, shift.EndTime);
+        bool updated = await _repository.UpdateShift(shiftDto.Id, shiftDto.StartTime, shiftDto.EndTime);
         if (!updated) return NotFound();
 
         return NoContent();   // code 204 No Content -> Successful update
     }
 
-    // TODO
     // DELETE api/Shifts/5
     [HttpDelete("{workerId}")]
     [ServiceFilter(typeof(ManagerAuthorizationFilter))]
-    public async Task<IActionResult> DeleteWorker(int workerId)
+    public async Task<IActionResult> DeleteWorker([FromRoute] int workerId)
     {
         bool deleted = await _repository.DeleteWorker(workerId);
         if (!deleted) return NotFound();
@@ -105,11 +103,10 @@ public class ShiftsController(WorkerShiftRepository repository) : ControllerBase
         return NoContent(); // code 204 No Content -> Successful delete
     }
 
-    // TODO
     // DELETE api/Shifts/5/{shiftId}
     [HttpDelete("{workerId}/{shiftId}")]
     [ServiceFilter(typeof(ManagerAuthorizationFilter))]
-    public async Task<IActionResult> DeleteShift(int shiftId)
+    public async Task<IActionResult> DeleteShift([FromRoute] int shiftId)
     {
         bool deleted = await _repository.DeleteShift(shiftId);
         if (!deleted) return NotFound();

@@ -20,8 +20,11 @@ public class WorkerShiftRepository
         return allShifts;
     }
 
-    internal async Task<List<Shift>> ReadAllShiftsForWorker(int id)
+    internal async Task<List<Shift>?> ReadAllShiftsForWorker(int id)
     {
+        Worker? worker = await _context.Workers.SingleOrDefaultAsync(w => w.Id == id);
+        if (worker == null) return null;
+
         List<Shift> workerShifts =  await _context.Shifts.Where(s => s.WorkerId == id).ToListAsync();
 
         return workerShifts;
