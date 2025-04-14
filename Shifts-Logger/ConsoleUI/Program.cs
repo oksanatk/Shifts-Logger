@@ -1,4 +1,8 @@
-﻿using ConsoleUI.Views;
+﻿using ConsoleUI.Services;
+using ConsoleUI.Views;
 
-ConsoleView consoleView = new ConsoleView();
+HttpClient httpClient = new HttpClient();
+WorkerShiftService workerShiftService = new WorkerShiftService(httpClient);
+ConsoleView consoleView = new ConsoleView(workerShiftService);
+
 consoleView.DisplayMainMenu();

@@ -1,9 +1,15 @@
-﻿using Spectre.Console;
+﻿using ConsoleUI.Services;
+using Spectre.Console;
 
 namespace ConsoleUI.Views;
 
 internal class ConsoleView
 {
+    private readonly WorkerShiftService _workerShiftService;
+    public ConsoleView(WorkerShiftService workerShiftService)
+    {
+        _workerShiftService = workerShiftService;
+    }
     internal void DisplayMainMenu()
     {
         string mainMenuChoice = "";
@@ -28,20 +34,29 @@ internal class ConsoleView
             switch (mainMenuChoice)
             {
                 case "View Shifts":
+                    // view all shifts
                     break;
                 case "View Workers":
+                    // view all workers
                     break;
                 case "Create New Worker":
+                    // create - input form
                     break;
                 case "Create New Shift":
+                    // create - input form
                     break;
                 case "Update Worker":
+                    // view all workers
                     break;
                 case "Update Shift":
+                    // view all workers, view shifts per worker
+                    // or just view all shifts by id
                     break;
                 case "Delete Worker":
+                    // view all workers with id
                     break;
                 case "Delete Shift":
+                    // view all shifts per worker, view all shifts by id
                     break;
                 case "Quit":
                     break;
@@ -51,4 +66,10 @@ internal class ConsoleView
             }
         } while (mainMenuChoice != "Quit");
     }
+
+    private void DisplayAllShiftsById() { }
+
+    private void DisplayAllWorkers() { }
+
+    private void DisplayAllWorkerShifts(int workerId) { }
 }
