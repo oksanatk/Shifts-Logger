@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ShiftsLogger.WebApi.Models;
+using System.Diagnostics;
 
 namespace ShiftsLogger.WebApi.Data;
 public class WorkerShiftContext : DbContext
@@ -14,6 +15,7 @@ public class WorkerShiftContext : DbContext
             .AddJsonFile("appsettings.json")
             .Build();
         optionsBuilder.UseSqlServer(configuration.GetConnectionString("LocalWorkerShiftDb"));
+        optionsBuilder.LogTo(message => Debug.WriteLine(message));
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
