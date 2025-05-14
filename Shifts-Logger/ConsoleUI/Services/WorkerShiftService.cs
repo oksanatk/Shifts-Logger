@@ -18,7 +18,7 @@ internal class WorkerShiftService
     {
         try
         {
-            using HttpResponseMessage response = await _httpClient.PostAsJsonAsync(_httpClient.BaseAddress + "api/Shifts/", shift);
+            using HttpResponseMessage response = await _httpClient.PostAsJsonAsync(_httpClient.BaseAddress + $"api/Shifts/{shift.WorkerId}", shift);
             return response.IsSuccessStatusCode;
         }catch (Exception ex)
         {
@@ -31,7 +31,7 @@ internal class WorkerShiftService
     {
         try
         {
-            using HttpResponseMessage response = await _httpClient.PostAsJsonAsync(_httpClient.BaseAddress + "api/Shifts/Workers/", worker);
+            using HttpResponseMessage response = await _httpClient.PostAsJsonAsync(_httpClient.BaseAddress + "api/Shifts/", worker);
             return response.IsSuccessStatusCode;
         }catch (Exception ex)
         {

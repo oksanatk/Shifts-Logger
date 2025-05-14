@@ -18,6 +18,7 @@ internal class ConsoleView
         {
             string managerCode = "";
             int selectedId = 0;
+            bool success = false;
 
             Console.Clear();
             mainMenuChoice = await AnsiConsole.PromptAsync(new SelectionPrompt<string>()
@@ -49,13 +50,15 @@ internal class ConsoleView
 
                 case "Create New Worker":
                     Worker createWorker= await GetInputsForWorker(false);
-                    await _workerShiftService.CreateNewWorker(createWorker);
+                    success = await _workerShiftService.CreateNewWorker(createWorker);
+                    AnsiConsole.MarkupLine(success ? "[green]Success![/]" : "[maroon]Failure :([/]");
                     // create - input form
                     break;
 
                 case "Create New Shift":
                     Shift createShift = await GetInputsForShift(false);
-                    await _workerShiftService.CreateNewShift(createShift);
+                    success = await _workerShiftService.CreateNewShift(createShift);
+                    AnsiConsole.MarkupLine(success ? "[green]Success![/]" : "[maroon]Failure :([/]");
                     // create - input form
                     break;
 
@@ -63,15 +66,18 @@ internal class ConsoleView
                     selectedId = await SelectWorkerById();
                     Worker updateWorker = await GetInputsForWorker(true, selectedId);
                     managerCode = await GetInputManagerCode();
-                    await _workerShiftService.UpdateWorker(updateWorker, managerCode);
+
+                    success = await _workerShiftService.UpdateWorker(updateWorker, managerCode);
+                    AnsiConsole.MarkupLine(success ? "[green]Success![/]" : "[maroon]Failure :([/]");
                     // view all workers
                     break;
 
                 case "Update Shift":
-                    selectedId = await SelectShiftById();
                     Shift updateShift = await GetInputsForShift(true);
                     managerCode = await GetInputManagerCode();
-                    await _workerShiftService.UpdateShift(new Shift { Id = selectedId, WorkerId = updateShift.WorkerId, StartTime = updateShift.StartTime, EndTime = updateShift.EndTime}, managerCode);
+
+                    success = await _workerShiftService.UpdateShift(updateShift, managerCode);
+                    AnsiConsole.MarkupLine(success ? "[green]Success![/]" : "[maroon]Failure :([/]");
                     // view all workers, view shifts per worker
                     // or just view all shifts by id
                     break;
@@ -79,14 +85,16 @@ internal class ConsoleView
                 case "Delete Worker":
                     selectedId = await SelectWorkerById();
                     managerCode = await GetInputManagerCode();
-                    await _workerShiftService.DeleteWorker(new Worker { Id = selectedId }, managerCode);
+                    success = await _workerShiftService.DeleteWorker(new Worker { Id = selectedId }, managerCode);
+                    AnsiConsole.MarkupLine(success ? "[green]Success![/]" : "[maroon]Failure :([/]");
                     // view all workers with id
                     break;
 
                 case "Delete Shift":
                     selectedId = await SelectShiftById();
                     managerCode = await GetInputManagerCode();
-                    await _workerShiftService.DeleteShift(new Shift { Id = selectedId }, managerCode);
+                    success = await _workerShiftService.DeleteShift(new Shift { Id = selectedId }, managerCode);
+                    AnsiConsole.MarkupLine(success ? "[green]Success![/]" : "[maroon]Failure :([/]");
                     // view all shifts per worker, view all shifts by id
                     break;
 
@@ -97,6 +105,9 @@ internal class ConsoleView
                     AnsiConsole.MarkupLine("[maroon]An unexpected error occurred. Please try again later.[/]");
                     break;
             }
+
+            AnsiConsole.MarkupLine("\nPress the [yellow]Enter[/] key to continue.");
+            Console.ReadLine();
         } while (mainMenuChoice != "Quit");
     }
 
@@ -112,7 +123,7 @@ internal class ConsoleView
         do
         {
             shiftChoice = await AnsiConsole.PromptAsync(new SelectionPrompt<string>()
-                                            .Title("Choose which shift to view:")
+                                            .Title("These are all the shifts:")
                                             .AddChoices(shiftDetails)
                                             .PageSize(10));
             Console.WriteLine(shiftChoice);
@@ -130,7 +141,7 @@ internal class ConsoleView
         do
         {
             workerChoice = await AnsiConsole.PromptAsync(new SelectionPrompt<string>()
-                                .Title("Choose which shift to view:")
+                                .Title("These are all the workers:")
                                 .AddChoices(workerDetails)
                                 .PageSize(10));
         } while (workerChoice != "Go Back");
@@ -144,7 +155,7 @@ internal class ConsoleView
         List<string> workerIds = allWorkers.Select(w => w.Id.ToString()).ToList();
 
         workerChoice = await AnsiConsole.PromptAsync(new SelectionPrompt<string>()
-                                .Title("Choose which shift to view:")
+                                .Title("Select your worker by id:")
                                 .AddChoices(workerIds)
                                 .PageSize(10));
         if (!String.IsNullOrEmpty(workerChoice))
@@ -161,7 +172,7 @@ internal class ConsoleView
         List<Shift> allShifts = await _workerShiftService.GetAllShifts();
         List<string> shiftIds = allShifts.Select(w => w.Id.ToString()).ToList();
         shiftChoice = await AnsiConsole.PromptAsync(new SelectionPrompt<string>()
-                                .Title("Choose which shift to view:")
+                                .Title("Select your shift by id:")
                                 .AddChoices(shiftIds)
                                 .PageSize(10));
         if (!String.IsNullOrEmpty(shiftChoice))
@@ -171,7 +182,7 @@ internal class ConsoleView
         return shiftId;
     }
 
-    private async Task<int> SelectShiftByWorkerId(int workerId)
+    private async Task<int> SelectShiftsByWorkerId(int workerId)
     {
 
         string shiftChoice = "";
@@ -201,12 +212,14 @@ internal class ConsoleView
         return new Worker { Name = name };
     }
 
-    private async Task<Shift> GetInputsForShift(bool isUpdating, int shiftId = -1)
+    private async Task<Shift> GetInputsForShift(bool isUpdating)
     {
+        int shiftId = -1;
+
         int workerId = await SelectWorkerById();
         if (isUpdating)
         {
-            shiftId = await SelectShiftByWorkerId(workerId);
+            shiftId = await SelectShiftsByWorkerId(workerId);
         }
 
         DateTime startTime = await AnsiConsole.PromptAsync(
